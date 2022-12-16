@@ -8,6 +8,7 @@ import std.conv;
 import std.math;
 import std.container;
 import std.range;
+import std.typecons;
 
 struct Sensor
 {
@@ -67,77 +68,40 @@ void main()
 
     foreach (ref sensor; sensors) sensor.dist = manhattanDistance(sensor, *sensor.closest);
 
-    foreach(sensor; sensors)
+    for (int y = 0; y <= maxSearchSpace; y++)
     {
-        // top right edge
-        for (int y = sensor.y - sensor.dist - 1; y < sensor.y; y++)
+        Tuple!(int, int)[] intervals;
+
+        foreach (sensor; sensors)
         {
-            int x = sensor.x + sensor.dist - (sensor.y - y) + 1;
-
-            if ((x < 0 || x > maxSearchSpace) || (y < 0 || y > maxSearchSpace)) continue;
-
-            if (!isCovered(Point(x, y), sensors))
+            const distToY = abs(sensor.y - y);
+            if (distToY <= sensor.dist)
             {
-                writeln(cast(long) x * maxSearchSpace + y);
-                writeln(x, " ", y);
+                const dt = sensor.dist - distToY;
+                intervals ~= tuple(sensor.x - dt, sensor.x + dt);
             }
         }
 
-        // bottom right edge
-        for (int y = sensor.y; y < sensor.y + sensor.dist + 1; y++)
+        intervals.sort!((a, b) => a[0] < b[0]);
+        for (int i = 1; i < intervals.length; i++)
         {
-            int x = sensor.x + sensor.dist - (y - sensor.y) + 1;
-
-            if ((x < 0 || x > maxSearchSpace) || (y < 0 || y > maxSearchSpace)) continue;
-
-            if (!isCovered(Point(x, y), sensors))
+            if (intervals[i][1] <= intervals[i-1][1])
             {
-                writeln(cast(long) x * maxSearchSpace + y);
-                writeln(x, " ", y);
+                intervals = intervals.remove(i);
+                i--;
             }
         }
 
-        // top left edge
-        for (int y = sensor.y - sensor.dist - 1; y < sensor.y; y++)
+        for (int i = 0; i + 1 < intervals.length; i++)
         {
-            int x = sensor.x - sensor.dist + (sensor.y - y) - 1;
-
-            if ((x < 0 || x > maxSearchSpace) || (y < 0 || y > maxSearchSpace)) continue;
-
-            if (!isCovered(Point(x, y), sensors))
+            if (intervals[i][1] + 1 < intervals[i+1][0])
             {
-                writeln(cast(long) x * maxSearchSpace + y);
-                writeln(x, " ", y);
-            }
-        }
-
-        // bottom left edge
-        for (int y = sensor.y; y < sensor.y + sensor.dist + 1; y++)
-        {
-            int x = sensor.x - sensor.dist + (y - sensor.y) - 1;
-
-            if ((x < 0 || x > maxSearchSpace) || (y < 0 || y > maxSearchSpace)) continue;
-
-            if (!isCovered(Point(x, y), sensors))
-            {
-                writeln(cast(long) x * maxSearchSpace + y);
-                writeln(x, " ", y);
+                writeln(intervals[i][1] + 1, " ", y);
+                writeln(cast(long) (intervals[i][1] + 1) * cast(long) 4_000_000 + cast(long) y);
+                return;
             }
         }
     }
-}
-
-bool isCovered(Point p, Sensor[] sensors)
-{
-    foreach(sensor; sensors)
-    {
-        if (p.x >= sensor.x - sensor.dist &&
-            p.x <= sensor.x + sensor.dist &&
-            p.y >= sensor.y - sensor.dist &&
-            p.y <= sensor.y + sensor.dist) return true;
-    }
-
-    return false;
 }
 
 int manhattanDistance(Point a, Point b)
