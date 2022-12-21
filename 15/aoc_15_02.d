@@ -96,7 +96,6 @@ void main()
         {
             if (intervals[i][1] + 1 < intervals[i+1][0])
             {
-                writeln(intervals[i][1] + 1, " ", y);
                 writeln(cast(long) (intervals[i][1] + 1) * cast(long) 4_000_000 + cast(long) y);
                 return;
             }

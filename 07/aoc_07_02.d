@@ -57,7 +57,6 @@ void main()
     }
 
     tree = goToRoot(tree);
-    printTree(tree);
 
     int totalSpace = dirSize(tree);
     int required = 30_000_000 - (70_000_000 - totalSpace);

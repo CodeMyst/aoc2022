@@ -57,7 +57,6 @@ void main()
     }
 
     tree = goToRoot(tree);
-    printTree(tree);
 
     int sum = 0;
     foreach (dir; small(tree)) sum += dirSize(dir);
